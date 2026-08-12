@@ -139,9 +139,45 @@
 	footer{border-top:1px solid var(--line);margin-top:80px;padding:30px 0 0;font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em}
 	@media(max-width:920px){.shell{grid-template-columns:1fr;padding:0 20px}nav.toc{display:none}main{padding-left:0}}
 	::selection{background:rgba(233,162,59,.28);color:#fff}
+
+	/* === AI SLOP disclaimer banner (gaudy, top) === */
+	@keyframes slop-slide{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+	@keyframes slop-wobble{0%,100%{transform:translateY(0) rotate(-1.2deg)}50%{transform:translateY(-3px) rotate(1.2deg)}}
+	@keyframes slop-spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+	.slop-banner{
+		background:linear-gradient(90deg,#ff2d95,#ff8a00,#ffe600,#22d46a,#00c2ff,#9b5cff,#ff2d95);
+		background-size:220% 100%;
+		animation:slop-slide 5s linear infinite;
+		padding:22px 20px 20px;text-align:center;
+		border-bottom:4px solid #000;
+		box-shadow:0 8px 28px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.15);
+	}
+	.slop-banner .row{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap}
+	.slop-banner .big{
+		font-family:"Space Grotesk",system-ui,sans-serif;font-weight:700;
+		font-size:clamp(26px,5.4vw,58px);letter-spacing:.01em;line-height:1;
+		color:#fff;text-transform:uppercase;display:inline-flex;align-items:center;gap:14px;
+		text-shadow:0 2px 0 #000,2px 0 0 #000,-2px 0 0 #000,0 -2px 0 #000,3px 3px 0 rgba(0,0,0,.35),0 0 22px rgba(0,0,0,.5);
+		animation:slop-wobble 1.8s ease-in-out infinite;
+	}
+	.slop-banner .big .emoji{display:inline-block;font-size:.9em;animation:slop-spin 6s linear infinite}
+	.slop-banner .sub{
+		font-family:"Pretendard Variable",system-ui,sans-serif;font-weight:600;
+		font-size:clamp(13px,1.9vw,20px);color:#fff;letter-spacing:.01em;
+		text-shadow:0 1px 0 #000,1px 0 0 #000,-1px 0 0 #000,0 -1px 0 #000;
+		opacity:.97;
+	}
 </style>
 </head>
 <body>
+
+<div class="slop-banner" role="note" aria-label="ai slop disclaimer">
+	<div class="row">
+		<span class="big"><span class="emoji">🤖</span> AI&nbsp;SLOP&nbsp;입니다.</span>
+		<span class="sub">혼자 보려고 만들었습니다.</span>
+	</div>
+</div>
+
 <div class="shell">
 
 <nav class="toc">
