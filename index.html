@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>ZCode 컨텍스트 매니지먼트 — 전문가를 위한 첫 안내서</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+	:root{
+		--bg:#0a0c0f;--bg-2:#0f1318;--surface:#14181f;--surface-2:#1a1f28;
+		--line:#262c37;--line-soft:#1d222b;
+		--ink:#e7e3d8;--ink-dim:#a9a59a;--muted:#6f7068;
+		--accent:#e9a23b;--accent-2:#6fd3c4;--danger:#e06a5a;--ok:#8fbf6a;
+		--mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+		--sans:"Pretendard Variable",Pretendard,system-ui,-apple-system,"Apple SD Gothic Neo",sans-serif;
+		--display:"Space Grotesk","Pretendard Variable",system-ui,sans-serif;
+		--maxw:1200px;
+	}
+	*{box-sizing:border-box}html,body{margin:0;padding:0}
+	body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16.5px;line-height:1.78;
+		-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+		background-image:radial-gradient(1200px 600px at 82% -8%, rgba(233,162,59,.06), transparent 60%),
+			linear-gradient(var(--line-soft) 1px,transparent 1px),linear-gradient(90deg,var(--line-soft) 1px,transparent 1px);
+		background-size:auto,56px 56px,56px 56px;}
+	a{color:var(--accent-2);text-decoration:none}a:hover{text-decoration:underline;text-underline-offset:3px}
+	.shell{display:grid;grid-template-columns:256px minmax(0,1fr);gap:0;max-width:var(--maxw);margin:0 auto;padding:0 28px}
+	nav.toc{position:sticky;top:0;align-self:start;height:100vh;padding:38px 22px 38px 0;border-right:1px solid var(--line);overflow:auto;font-family:var(--mono);font-size:12.5px}
+	.toc .brand{font-family:var(--display);font-weight:700;font-size:14px;color:var(--ink);margin-bottom:2px}
+	.toc .brand b{color:var(--accent)}
+	.toc .sub{color:var(--muted);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:24px;line-height:1.5}
+	.toc ol{list-style:none;margin:0;padding:0;counter-reset:toc}
+	.toc li a{display:flex;gap:10px;color:var(--ink-dim);padding:6px 0;line-height:1.45;transition:color .15s}
+	.toc li a::before{counter-increment:toc;content:counter(toc,decimal-leading-zero);color:var(--muted);min-width:22px}
+	.toc li a:hover{color:var(--accent);text-decoration:none}
+	main{padding:46px 0 140px 46px;min-width:0}
+
+	.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:10px;margin-bottom:22px}
+	.kicker::before{content:"";width:28px;height:1px;background:var(--accent)}
+	h1{font-family:var(--display);font-weight:700;line-height:1.04;letter-spacing:-.015em;font-size:clamp(38px,6vw,70px);margin:0 0 22px}
+	h1 .dim{color:var(--ink-dim);font-weight:500}
+	.lede{max-width:64ch;font-size:19px;color:var(--ink-dim);margin:0 0 34px}.lede b{color:var(--ink);font-weight:600}
+	.audience{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:18px 22px;margin:0 0 30px;max-width:64ch}
+	.audience .t{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-2);margin-bottom:8px}
+	.audience p{margin:0;font-size:14.5px;color:var(--ink-dim)}
+	.meta-row{display:flex;flex-wrap:wrap;gap:10px;font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:14px 0;margin-bottom:56px}
+	.meta-row span b{color:var(--ink-dim);font-weight:500}.meta-row .dot{color:var(--line)}
+
+	section{padding:50px 0;border-top:1px solid var(--line-soft);scroll-margin-top:24px}
+	section:first-of-type{border-top:0}
+	.sec-head{display:flex;align-items:baseline;gap:18px;margin-bottom:24px;flex-wrap:wrap}
+	.sec-num{font-family:var(--mono);font-size:13px;color:var(--accent);border:1px solid var(--accent);padding:3px 9px;border-radius:3px;line-height:1}
+	h2{font-family:var(--display);font-weight:600;font-size:clamp(25px,3.2vw,36px);letter-spacing:-.01em;margin:0;line-height:1.18}
+	h2 .ko{color:var(--ink-dim);font-weight:500;font-size:.6em;display:block;font-family:var(--sans);letter-spacing:0;margin-top:6px}
+	h3{font-family:var(--display);font-weight:600;font-size:19px;margin:32px 0 12px;letter-spacing:-.005em}
+	p{margin:14px 0}strong{color:var(--ink);font-weight:600}
+	ul,ol{margin:14px 0;padding-left:22px}li{margin:7px 0}li::marker{color:var(--accent)}
+	code,c{font-family:var(--mono);font-size:.86em;color:var(--accent-2);background:rgba(111,211,196,.07);padding:1.5px 6px;border-radius:4px;border:1px solid rgba(111,211,196,.16);white-space:nowrap}
+
+	pre{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:18px 20px;overflow:auto;margin:18px 0;font-family:var(--mono);font-size:13px;line-height:1.7;color:#cfcbbb}
+	pre .c1{color:var(--muted)}pre .k{color:var(--accent)}pre .s{color:var(--ok)}pre .p{color:var(--accent-2)}pre .n{color:#c9a86a}
+
+	/* bridge callout: 익숙한 개념 → ZCode */
+	.bridge{border:1px solid var(--line);border-left:3px solid var(--accent-2);background:var(--surface);border-radius:0 9px 9px 0;padding:15px 20px;margin:22px 0}
+	.bridge .t{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-2);margin-bottom:8px}
+	.bridge .row{display:grid;grid-template-columns:1fr 18px 1fr;gap:10px;align-items:start;font-size:14.5px}
+	.bridge .row .from{color:var(--ink-dim)}.bridge .row .to{color:var(--ink)}
+	.bridge .row .arr{color:var(--accent);text-align:center;font-family:var(--mono);padding-top:2px}
+	.bridge .note{color:var(--muted);font-size:12.5px;margin-top:9px;font-family:var(--mono)}
+	@media(max-width:640px){.bridge .row{grid-template-columns:1fr;}.bridge .row .arr{transform:rotate(90deg);padding:2px 0}}
+
+	.callout{border-left:2px solid var(--accent);background:linear-gradient(90deg,rgba(233,162,59,.07),transparent 60%);padding:14px 20px;margin:22px 0;border-radius:0 7px 7px 0}
+	.callout .t{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+
+	/* comparison table */
+	.cmp{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
+	.cmp th,.cmp td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+	.cmp th{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500;background:var(--bg-2)}
+	.cmp td .h{color:var(--ink);font-weight:600;margin-bottom:3px}
+	.cmp td .d{color:var(--ink-dim);font-size:12.5px}
+	.cmp tr:hover td{background:rgba(255,255,255,.012)}
+
+	/* arch diagram */
+	.arch{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:24px 0;align-items:stretch}
+	.arch .box{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px;position:relative}
+	.arch .box .role{font-family:var(--mono);font-size:10px;color:var(--accent-2);letter-spacing:.1em;margin-bottom:5px}
+	.arch .box .nm{font-weight:600;color:var(--ink);font-family:var(--display);margin-bottom:5px}
+	.arch .box .ds{color:var(--ink-dim);font-size:12px;line-height:1.5}
+	.arch .box.kernel{border-color:var(--accent);background:linear-gradient(180deg,rgba(233,162,59,.07),var(--surface))}
+	.arch .box.kernel .role{color:var(--accent)}
+	.arch .arr{display:flex;align-items:center;justify-content:center;color:var(--accent)}
+	@media(max-width:860px){.arch{grid-template-columns:1fr;}.arch .arr{transform:rotate(90deg);height:22px}}
+
+	.budget{margin:26px 0}
+	.budget-bar{display:flex;height:46px;border-radius:6px;overflow:hidden;border:1px solid var(--line);font-family:var(--mono);font-size:10.5px}
+	.budget-bar .seg{display:flex;align-items:center;justify-content:center;color:#0a0c0f;font-weight:600;padding:0 6px;text-align:center;line-height:1.1;overflow:hidden;white-space:nowrap}
+	.budget-leg{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;margin-top:14px;font-size:13px}
+	.budget-leg .row{display:flex;gap:9px;align-items:flex-start}
+	.budget-leg .sw{width:10px;height:10px;border-radius:2px;margin-top:6px;flex:0 0 auto}
+	.budget-leg .nm{font-family:var(--mono);color:var(--ink);font-size:12px}
+	.budget-leg .ds{color:var(--ink-dim);font-size:12.5px}
+
+	.pipe{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin:26px 0;align-items:stretch}
+	.pipe .step{background:var(--surface);border:1px solid var(--line);padding:14px;border-radius:8px;font-size:13px}
+	.pipe .step .n{font-family:var(--mono);font-size:10.5px;color:var(--accent);letter-spacing:.1em}
+	.pipe .step .t{font-weight:600;color:var(--ink);margin:5px 0 6px;font-family:var(--display)}
+	.pipe .step .d{color:var(--ink-dim);font-size:12px;line-height:1.5}
+	.pipe .arr{display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:18px}
+	@media(max-width:860px){.pipe{grid-template-columns:1fr}.pipe .arr{transform:rotate(90deg);height:24px}}
+
+	.gauge{margin:26px 0;background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:22px}
+	.gauge-track{position:relative;height:18px;background:var(--bg-2);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+	.gauge-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--accent-2),var(--accent));border-right:1px solid #0a0c0f}
+	.gauge-mark{position:absolute;top:-6px;bottom:-6px;width:2px;background:var(--danger)}
+	.gauge-mark::after{content:"budget";position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:10px;color:var(--danger);white-space:nowrap}
+	.gauge-scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:8px}
+	.status-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+	.badge{font-family:var(--mono);font-size:11.5px;padding:5px 11px;border-radius:20px;border:1px solid var(--line);color:var(--ink-dim)}
+	.badge.active{color:var(--accent-2);border-color:rgba(111,211,196,.4);background:rgba(111,211,196,.08)}
+	.badge.limited{color:var(--accent);border-color:rgba(233,162,59,.4);background:rgba(233,162,59,.08)}
+	.badge.paused{color:var(--danger);border-color:rgba(224,106,90,.4);background:rgba(224,106,90,.08)}
+
+	table.tbl{width:100%;border-collapse:collapse;margin:18px 0;font-size:13.5px}
+	table.tbl th,table.tbl td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+	table.tbl th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+	table.tbl td .desc{color:var(--ink-dim);font-size:12.5px;margin-top:3px}
+
+	.overview{margin:30px 0;display:grid;gap:12px}
+	.ov-row{display:grid;grid-template-columns:180px 1fr;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--surface)}
+	.ov-row .lab{background:var(--surface-2);padding:14px 16px;font-family:var(--mono);font-size:12px;color:var(--accent);border-right:1px solid var(--line);display:flex;align-items:center}
+	.ov-row .body{padding:14px 16px;font-size:13.5px;color:var(--ink-dim)}.ov-row .body b{color:var(--ink)}
+
+	.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+	@media(max-width:760px){.grid-2{grid-template-columns:1fr}}
+
+	footer{border-top:1px solid var(--line);margin-top:80px;padding:30px 0 0;font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em}
+	@media(max-width:920px){.shell{grid-template-columns:1fr;padding:0 20px}nav.toc{display:none}main{padding-left:0}}
+	::selection{background:rgba(233,162,59,.28);color:#fff}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<nav class="toc">
+	<div class="brand"><b>◆</b> ZCODE / KERNEL</div>
+	<div class="sub">For the context-savvy<br/>first-time reader</div>
+	<ol>
+		<li><a href="#what">ZCode가 뭔가</a></li>
+		<li><a href="#model">메탈모델 · 비교</a></li>
+		<li><a href="#budget">7-소스 예산</a></li>
+		<li><a href="#prompt">프롬프트 계층 · 캐시</a></li>
+		<li><a href="#windowing">윈도잉</a></li>
+		<li><a href="#compaction">Compaction</a></li>
+		<li><a href="#target">Target-Budget 연속</a></li>
+		<li><a href="#toolbudget">툴 출력 예산</a></li>
+		<li><a href="#queue">입력 큐</a></li>
+		<li><a href="#retry">재시도 · 백오프</a></li>
+		<li><a href="#persist">영속 스키마</a></li>
+		<li><a href="#pipeline">전체 파이프라인</a></li>
+	</ol>
+</nav>
+
+<main>
+
+<header>
+	<div class="kicker">A Field Guide · Reverse-Engineered from bundle + runtime</div>
+	<h1>ZCode의 컨텍스트를<br/><span class="dim">읽어내는 법</span></h1>
+	<p class="lede">
+		독자는 이미 안다 — 컨텍스트 윈도우, prompt caching, sliding-window 요약, 툴 결과 절단, 세션 영속을.
+		이 글은 그 지식 위에 <b>ZCode(지에이전트 데스크톱 에이전트)가 그 문제들을 어떻게 특유의 방식으로 재실현했는지</b>를
+		bundle(<c>out/host</c>·<c>out/scheduler</c>)과 런타임(<c>db.sqlite</c>·<c>model-io</c>)을 교차검증해 보여준다.
+		각 단위는 <strong>“익숙한 패턴 → ZCode의 Δ”</strong>로 전개한다.
+	</p>
+	<div class="audience">
+		<div class="t">READER PROFILE</div>
+		<p>에이전트 루프와 컨텍스트 방법론에 해박하지만 ZCode는 처음. 따라서 기초 개념은 건너뛰고, <em>ZCode가 그 개념을 어떤 구체적 메커니즘으로, 왜 그렇게, 실현했는지</em>를 벤치마크 시스템과 대비하며 설명한다.</p>
+	</div>
+	<div class="meta-row">
+		<span><b>SOURCE</b> @zcode/desktop v3.7.5</span><span class="dot">/</span>
+		<span><b>BACKEND</b> GLM-5.2 · api.z.ai (Anthropic 호환)</span><span class="dot">/</span>
+		<span><b>VERIFY</b> bundle ↔ db.sqlite ↔ rollout</span>
+	</div>
+</header>
+
+<!-- ===================== 1. WHAT IS ZCODE ===================== -->
+<section id="what">
+	<div class="sec-head"><span class="sec-num">00</span><h2>ZCode in 60 seconds<span class="ko">이 시스템은 무엇이고, 컨텍스트 매니지먼트는 어디에 사는가</span></h2></div>
+	<p>
+		ZCode는 <strong>지에이전트(Z.AI)의 데스크톱 코딩 에이전트</strong>다. Electron 앱이며, 백본 모델은 자사 <c>GLM-5.2</c>를
+		<c>api.z.ai/api/anthropic</c>(Anthropic Messages 호환 엔드포인트)를 통해 쓴다 — 즉 <strong>Anthropic 스펙을 말하지만 Claude가 아닌</strong> 독특한 위치다.
+		이 사실이 아래 전체에 영향을 준다(prompt caching·tool_use·thinking 스펙을 그대로 쓰되 동작은 GLM).
+	</p>
+
+	<h3>프로세스 아키텍처 — 컨텍스트 매니지먼트가 사는 곳</h3>
+	<div class="arch">
+		<div class="box"><div class="role">UI</div><div class="nm">Electron main + renderer</div><div class="ds">TUI/Web 셸. 메시지 렌더링·타임라인·승인 다이얼로그</div></div>
+		<div class="arr">↔</div>
+		<div class="box kernel"><div class="role">AGENT KERNEL</div><div class="nm">host process<br/>(zcode-host-local)</div><div class="ds"><b>컨텍스트 매니지먼트가 거주</b> — 루프·compaction·target-budget·권한게이트·툴 디스패치</div></div>
+		<div class="arr">↔</div>
+		<div class="box"><div class="role">SCHEDULER</div><div class="nm">scheduler process</div><div class="ds">독립 cron/자동화 프로세스. 세션과 분리된 타이밍·claim-lease</div></div>
+		<div class="arr">↔</div>
+		<div class="box"><div class="role">MODEL</div><div class="nm">GLM-5.2<br/>api.z.ai</div><div class="ds">Anthropic Messages 포맷. cache_control·thinking·tool_use 지원</div></div>
+	</div>
+	<p>
+		두 프로세스는 <strong>JSON-RPC “ZCode Protocol”</strong>(trusted channel, <c>session/send</c>·<c>session/compact</c>·<c>automation/create</c> 등 라우트)로 통신한다.
+		핵심은 <strong>컨텍스트 매니지먼트가 UI도, 스케줄러도 아닌 host 프로세스(에이전트 커널)에 있다</strong>는 점 — 이후 모든 메커니즘은 이 커널 안에서 일어난다.
+	</p>
+</section>
+
+<!-- ===================== 2. MENTAL MODEL ===================== -->
+<section id="model">
+	<div class="sec-head"><span class="sec-num">01</span><h2>메탈모델<span class="ko">다섯 겹의 방어벽 — 그리고 익숙한 패턴과의 매핑</span></h2></div>
+	<p>
+		ZCode는 컨텍스트를 하나의 큰 “줄이기” 문제로 보지 않는다. 대신 <strong>목적이 다른 다섯 개의 독립된 밸브</strong>로 취급한다.
+		한 밸브가 느슨하면 다음 밸브가 보완하는 식. 당신이 아는 패턴들이 어디에 대응하는지 먼저 매핑하자.
+	</p>
+
+	<table class="cmp">
+		<thead><tr><th style="width:30%">익숙한 패턴</th><th>ZCode의 실현</th><th style="width:26%">주목할 Δ</th></tr></thead>
+		<tbody>
+			<tr>
+				<td><div class="h">토큰 예산 산정</div><div class="d">보통은 input tokens 단일 값</div></td>
+				<td><div class="h">7-소스 분해 예산 (rS enum)</div><div class="d">system_prompt · meta · skills · tool_prompt · 시스템/MCP 스키마 · messages 각각 chars 추적</div></td>
+				<td><div class="d">“어디가 비대한가” 진단 가능 — MCP 툴 많아지면 스키마가 폭발하는 식의 병목 위치화</div></td>
+			</tr>
+			<tr>
+				<td><div class="h">Prompt caching</div><div class="d">정적 시스템 프롬프트를 캐시</div></td>
+				<td><div class="h">다블록 캐시 레이어</div><div class="d">4-layer 고정 블록 각각 <c>cache_control:ephemeral</c>, 별도 소스로 예산 추적</div></td>
+				<td><div class="d">캐시 단위를 세밀하게 쪼개 히트율 극대화 — 관측 사례 42% cacheRead 적중</div></td>
+			</tr>
+			<tr>
+				<td><div class="h">Sliding window</div><div class="d">오래된 메시지 단순 컷</div></td>
+				<td><div class="h">명시적 윈도잉</div><div class="d"><c>messageOffset/Count</c>로 활성 창 추적, <c>messagesKind: full/delta</c></div></td>
+				<td><div class="d">단절이 아니라 compaction과 짝지어 “어디서부터 모델이 보는가”를 정밀 제어</div></td>
+			</tr>
+			<tr>
+				<td><div class="h">요약 / <c>/compact</c></div><div class="d">수동 또는 단일 임계 트리거</div></td>
+				<td><div class="h">1급 compaction 턴 + 5 트리거</div><div class="d">manual·auto·partial·reactive·session_memory; 별도 모델콜로 구조화 요약</div></td>
+				<td><div class="d">compaction이 “후처리”가 아니라 하나의 <em>턴 종류</em> — 추적·재시도·상태 머신 보유</div></td>
+			</tr>
+			<tr>
+				<td><div class="h">오버플로 처리</div><div class="d">강제 요약 or 에러</div></td>
+				<td><div class="h">Target-Budget 연속(continuation)</div><div class="d"><c>session_target</c> 예산 도달 시 새 run으로 <c>summary_title</c>을 끌고 이어감</div></td>
+				<td><div class="d"><strong>요약으로 억지 구겨 넣지 않고 “새 페이지에서 계속”</strong> — 긴 작업의 핵심 기술</div></td>
+			</tr>
+			<tr>
+				<td><div class="h">툴 결과 절단</div><div class="d">maxTokens 컷</div></td>
+				<td><div class="h">budgetStrategy: artifact/truncate</div><div class="d">거대 stdout은 파일로 offload 후 <em>참조</em>만 반환</div></td>
+				<td><div class="d">원본 보존 + 모델이 필요 시 재방문 — 빌드 로그 등을 다루는 깔끔한 방식</div></td>
+			</tr>
+			<tr>
+				<td><div class="h">인터럽트/스티어링</div><div class="d">큐 또는 즉시 주입</div></td>
+				<td><div class="h">3-way delivery + 생애주기</div><div class="d">startNow(인터럽트) · guide(인플라이트, 기본) · queue(다음 턴); admitted→promoted</div></td>
+				<td><div class="d">긴 턴 중 입력이 손실 없이 “의미있는 시점”에 합류</div></td>
+			</tr>
+		</tbody>
+	</table>
+
+	<div class="callout">
+		<div class="t">THE CORE INSIGHT</div>
+		런타임 관측에서 ZCode는 <strong>요약 모델콜을 드물게 발화</strong>한다. 대신 <c>session_target</c> 기반 <strong>구조적 연속(continuation)</strong>이 주 압축 수단이고,
+		요약(compaction) 경로는 존재하되 1M 윈도우 안에 드는 세션에선 dormant. 두 축은 “압축해 넣기 vs 새 페이지로 넘기기”라는 <em>서로 다른 전략</em>의 보완 관계다.
+	</div>
+</section>
+
+<!-- ===================== 3. BUDGET ===================== -->
+<section id="budget">
+	<div class="sec-head"><span class="sec-num">02</span><h2>7-소스 컨텍스트 예산<span class="ko">rS enum — 예산 산정을 진단 도구로</span></h2></div>
+
+	<div class="bridge">
+		<div class="t">FAMILIAR → ZCODE</div>
+		<div class="row">
+			<div class="from">토큰 예산 = <code>input_tokens</code> 하나. “컨텍스트가 찼다”는 사실만 안다.</div>
+			<div class="arr">→</div>
+			<div class="to">컨텍스트를 <strong>7개 소스로 분해</strong>해 각 chars를 센다. <em>“무엇이 찼는가”</em>를 안다.</div>
+		</div>
+		<div class="note">왜? — 병목이 메시지인지 스키마인지 스킬인지 알아야 조치(툴 끄기·스킴 다이어트)가 가능하다.</div>
+	</div>
+
+	<pre><span class="c1">// bundle · host/chunk-QNNA7UDT.js — verbatim enum</span>
+rS = n.enum([
+  <span class="s">"system_prompt"</span>, <span class="s">"meta_user_context"</span>, <span class="s">"skills"</span>,
+  <span class="s">"tool_prompt"</span>, <span class="s">"system_tool_schemas"</span>,
+  <span class="s">"mcp_tool_schemas"</span>, <span class="s">"messages"</span>,
+]) <span class="c1">// 각 값마다 chars 카운트 → compaction.terminal에 노출</span></pre>
+
+	<div class="budget">
+		<div class="budget-bar" aria-label="context budget breakdown">
+			<div class="seg" style="flex:14;background:#e9a23b">system_prompt</div>
+			<div class="seg" style="flex:4;background:#d98c2a">meta</div>
+			<div class="seg" style="flex:11;background:#c47a23;color:#0a0c0f">skills</div>
+			<div class="seg" style="flex:8;background:#6fd3c4">tool_prompt</div>
+			<div class="seg" style="flex:13;background:#5bb8aa;color:#0a0c0f">sys_schemas</div>
+			<div class="seg" style="flex:6;background:#4a9d91;color:#0a0c0f">mcp_schemas</div>
+			<div class="seg" style="flex:44;background:#3a4452;color:#cfcbbb">messages</div>
+		</div>
+		<div class="budget-leg">
+			<div class="row"><span class="sw" style="background:#e9a23b"></span><div><div class="nm">system_prompt</div><div class="ds">정체성·페르소나·지침 본문 (캐시됨)</div></div></div>
+			<div class="row"><span class="sw" style="background:#d98c2a"></span><div><div class="nm">meta_user_context</div><div class="ds">사용자 메타 컨텍스트</div></div></div>
+			<div class="row"><span class="sw" style="background:#c47a23"></span><div><div class="nm">skills</div><div class="ds">활성 스킬 name+설명 목록</div></div></div>
+			<div class="row"><span class="sw" style="background:#6fd3c4"></span><div><div class="nm">tool_prompt</div><div class="ds">“Available tools” 섹션</div></div></div>
+			<div class="row"><span class="sw" style="background:#5bb8aa"></span><div><div class="nm">system_tool_schemas</div><div class="ds">내장 툴 input_schema</div></div></div>
+			<div class="row"><span class="sw" style="background:#4a9d91"></span><div><div class="nm">mcp_tool_schemas</div><div class="ds">MCP 서버 툴 스키마 (MCP 많으면 폭발)</div></div></div>
+			<div class="row"><span class="sw" style="background:#3a4452"></span><div><div class="nm">messages</div><div class="ds">실제 대화·툴결과·추론 톤 (보통 최대)</div></div></div>
+		</div>
+	</div>
+	<p>
+		전문가에게 의미 있는 점: 이 분해는 단순한 <em>보고</em>가 아니라 <strong>정량적 진단</strong>을 가능하게 한다.
+		“MCP 서버를 3개 껐더니 <c>mcp_tool_schemas</c>가 22% 줄어 input이 18% 감소했다” 같은 판단 — 즉 컨텍스트 예산이 <strong>관측 가능성(observability) 도구</strong>로 설계되어 있다.
+	</p>
+</section>
+
+<!-- ===================== 4. PROMPT ===================== -->
+<section id="prompt">
+	<div class="sec-head"><span class="sec-num">03</span><h2>시스템 프롬프트 계층화 · 캐시<span class="ko">캐시 단위를 쪼개 히트율을 극대화한다</span></h2></div>
+
+	<div class="bridge">
+		<div class="t">FAMILIAR → ZCODE</div>
+		<div class="row">
+			<div class="from">하나의 큰 시스템 프롬프트 문자열을 통째로 <code>cache_control</code>.</div>
+			<div class="arr">→</div>
+			<div class="to">4-layer 고정 블록을 <strong>각각 독립 캐시 블록</strong>으로 분리. 어디가 바뀌어도 다른 층은 히트 유지.</div>
+		</div>
+		<div class="note">왜? — Anthropic 캐시는 “접두어 일치” 기반이라, 뒤쪽 한 글자 바뀌면 그 뒤는 캐시 미스. 층을 나누면 변경된 층만 미스.</div>
+	</div>
+
+	<pre><span class="c1">// request.body.system — Anthropic cached text blocks</span>
+[
+  { <span class="p">type</span>:<span class="s">"text"</span>, <span class="p">text</span>:<span class="s">"You are ZCode, an interactive coding agent"</span>,
+    <span class="p">cache_control</span>:{<span class="p">type</span>:<span class="s">"ephemeral"</span>} },            <span class="c1">// L1 정체성 (거의 안 변함)</span>
+  { <span class="p">type</span>:<span class="s">"text"</span>, <span class="p">text</span>:<span class="s">"You are an agent for ZCode CLI…"</span> },   <span class="c1">// L2 페르소나</span>
+  { <span class="p">type</span>:<span class="s">"text"</span>, <span class="p">text</span>:<span class="s">"Notes: - Agent threads have cwd reset…"</span> }, <span class="c1">// L3 운영 메모</span>
+  { <span class="p">type</span>:<span class="s">"text"</span>, <span class="p">text</span>:<span class="s">"…&lt;env&gt;Working directory: …&lt;/env&gt;"</span> }   <span class="c1">// L4 환경 (cwd 등)</span>
+]</pre>
+	<h3>동적 인젝션</h3>
+	<ul>
+		<li><code>&lt;system-reminder&gt;</code> user-role 블록 — <c>currentDate</c> 같은 경량 상태를 흘린다.</li>
+		<li><strong>Skills 블록</strong> — 활성 스킬 name+설명만 (~15.8KB). 본문은 progressive disclosure로 <em>호출 시점에만</em> 주입.</li>
+		<li><strong>Tool 스키마</strong> — 활성 툴의 <c>input_schema</c>가 별도 소스(system/mcp_tool_schemas)로 분리 추적.</li>
+	</ul>
+	<div class="callout">
+		<div class="t">OBSERVED PAYOFF</div>
+		한 턴의 usage: <c>input 4172 + cacheRead 3072 = 7244</c> 토큰 중 <strong>42%가 캐시 적중</strong>.
+		GLM 백엔드에서도 Anthropic 호환 캐시가 작동한다는 증거이며, 캐시 단위를 쪼갠 설계가 비용을 가른다.
+	</div>
+</section>
+
+<!-- ===================== 5. WINDOWING ===================== -->
+<section id="windowing">
+	<div class="sec-head"><span class="sec-num">04</span><h2>컨텍스트 윈도잉<span class="ko">messageOffset / Count — 활성 창의 명시적 추적</span></h2></div>
+
+	<div class="bridge">
+		<div class="t">FAMILIAR → ZCODE</div>
+		<div class="row">
+			<div class="from">슬라이딩 윈도우: 최근 N개 메시지를 기계적으로 유지. “모델이 지금 뭘 보는가”는 불투명.</div>
+			<div class="arr">→</div>
+			<div class="to"><c>messageOffset</c>(시작)·<c>messageCount</c>(개수)로 <strong>활성 창을 명시</strong>. compaction 이력이 offset 점프로 반영.</div>
+		</div>
+		<div class="note">왜? — 윈도우 경계를 compaction·continuation과 정합시켜 “잘린 게 아니라 요약으로 교체됐다”를 모델에게 일관되게 보여주기 위해.</div>
+	</div>
+
+	<table class="tbl">
+		<thead><tr><th>필드</th><th>의미 · 관측</th></tr></thead>
+		<tbody>
+			<tr><td><code>messageOffset</code></td><td>활성 창 시작. compaction 후 <c>firstKeptEntryId</c> 이후로 점프. <div class="desc">0 = 압축 없이 전체 히스토리</div></td></tr>
+			<tr><td><code>messageCount</code></td><td>이번 요청 메시지 수. 턴이 쌓이며 증가. <div class="desc">관측: 한 턴에 7 → 51 (14회 모델콜)</div></td></tr>
+			<tr><td><code>messagesKind</code></td><td><code>"full"</code>(완전 스냅샷) / <code>"delta"</code>(증분, 메타 희소) — 트레이스 밀도 조절</td></tr>
+			<tr><td><code>maxOutputTokens</code></td><td>맥락 기반 출력 캡 (예: 99072)</td></tr>
+			<tr><td><code>output_config.effort</code></td><td>추론 강도 ≡ <c>thinkingLevel</c> ≡ <c>variant</c> (예: <c>"max"</c>) — 세 표현이 같은 값</td></tr>
+		</tbody>
+	</table>
+</section>
+
+<!-- ===================== 6. COMPACTION ===================== -->
+<section id="compaction">
+	<div class="sec-head"><span class="sec-num">05</span><h2>Compaction 엔진<span class="ko">요약은 후처리가 아니라 1급 턴이다</span></h2></div>
+
+	<div class="bridge">
+		<div class="t">FAMILIAR → ZCODE</div>
+		<div class="row">
+			<div class="from"><c>/compact</c> 같은 수동 요약, 또는 단일 임계값 자동 요약. 부수적인 정리 작업.</div>
+			<div class="arr">→</div>
+			<div class="to">compaction은 <strong>1급 메시지 파트</strong>(<c>type:"compaction"</c>)이자 <strong>1급 턴 종류</strong>(<c>activeTurnKind:"compact"</c>). 자체 상태머신·재시도·5 트리거.</div>
+		</div>
+		<div class="note">왜? — 요약을 “터진 뒤 비상 조치”가 아니라 예방적으로 스케줄되는 일급 연산으로 격상시켜, 실패/부분/재시도를 정석적으로 다루기 위해.</div>
+	</div>
+
+	<h3>파이프라인</h3>
+	<div class="pipe">
+		<div class="step"><div class="n">01 / TRIGGER</div><div class="t">발화</div><div class="d">5종 트리거 중 하나 판정</div></div>
+		<div class="arr">→</div>
+		<div class="step"><div class="n">02 / PREPARE</div><div class="t">컷 포인트</div><div class="d">firstKeptEntryId 산정, 분할 턴 처리, 직전 요약 참조</div></div>
+		<div class="arr">→</div>
+		<div class="step"><div class="n">03 / SUMMARIZE</div><div class="t">요약 생성</div><div class="d">별도 모델콜 — Goal/Progress/Decisions/Next + 읽기/수정 파일</div></div>
+		<div class="arr">→</div>
+		<div class="step"><div class="n">04 / PERSIST</div><div class="t">엔트리 교체</div><div class="d">CompactionEntry 기록, 타임라인 separator 표시</div></div>
+		<div class="arr">→</div>
+		<div class="step"><div class="n">05 / EMIT</div><div class="t">compaction.terminal</div><div class="d">pre/post 토큰·트리거·모델·상태 방출</div></div>
+	</div>
+
+	<h3>compaction.terminal — bundle verbatim</h3>
+	<pre>{
+  <span class="p">status</span>: <span class="s">"completed"</span> | <span class="s">"failed"</span> | <span class="s">"interrupted"</span>,
+  <span class="p">trigger</span>: <span class="s">"manual"</span> | <span class="s">"auto"</span> | <span class="s">"partial"</span> | <span class="s">"reactive"</span> | <span class="s">"session_memory"</span>,
+  <span class="p">attempt</span>: <span class="n">1</span>, <span class="p">maxAttempts</span>: <span class="n">1</span>,
+  <span class="p">preCompactTokenCount</span>: <span class="n">…</span>, <span class="p">postCompactTokenCount</span>: <span class="n">…</span>,
+  <span class="p">truePostCompactTokenCount</span>: <span class="n">…</span>,  <span class="c1">// 요약 자체 토큰까지 포함한 실제 사후 크기</span>
+  <span class="p">modelName</span>: <span class="s">"GLM-5.2"</span>, <span class="p">compactReason</span>: <span class="s">"…"</span>
+}</pre>
+
+	<h3>5 트리거의 의미 — 왜 5개인가</h3>
+	<table class="tbl">
+		<thead><tr><th>trigger</th><th>언제 · 왜 별도인가</th></tr></thead>
+		<tbody>
+			<tr><td><code>manual</code></td><td>사용자 명시 <c>/compact</c>. 사용자 주도.</td></tr>
+			<tr><td><code>auto</code></td><td><c>contextWindow − reserve</c> 임계 <em>사전</em> 도달. 터지기 전에 예방.</td></tr>
+			<tr><td><code>partial</code></td><td>터진 경계를 안 쓰는 범위에서 <strong>부분</strong> 요약. 무결성 보존.</td></tr>
+			<tr><td><code>reactive</code></td><td>이미 overflow 발생 후 <strong>반응式</strong>. 1회 재시도와 쌍.</td></tr>
+			<tr><td><code>session_memory</code></td><td>세션 복원/핸드오프 시 기억 정비. 세션 단위 요약 동기화.</td></tr>
+		</tbody>
+	</table>
+	<div class="callout">
+		<div class="t">FAILURE MAPPING</div>
+		원인을 정규식 분류: <code>/abort|cancel|interrupt|stop/i.test(reason) ? "interrupted" : "failed"</code> —
+		사용자 중단과 진짜 오류를 구분해 기록. 재시도 정책이 이 값에 의존한다.
+	</div>
+	<p>
+		타임라인엔 <code>type:"context_compaction"</code>, <code>display:"separator"</code>로 나타나며 <c>operationId</c>·<c>boundaryId</c>·<c>summaryMessageId</c>로 원본과 요약을 연결한다.
+		이전 메시지는 <strong>브라우징 가능하지만 모델 컨텍스트엔 빠진다</strong> — 사용자 경험과 모델 관점을 분리하는 깔끔한 설계.
+	</p>
+</section>
+
+<!-- ===================== 7. TARGET BUDGET ===================== -->
+<section id="target">
+	<div class="sec-head"><span class="sec-num">06</span><h2>Target-Budget 연속<span class="ko">continuation — ZCode만의 차별적 설계</span></h2></div>
+
+	<div class="bridge">
+		<div class="t">FAMILIAR → ZCODE</div>
+		<div class="row">
+			<div class="from">한 작업이 윈도우를 초과하면 → 강제 요약으로 구겨 넣거나, 잘라내거나, 실패.</div>
+			<div class="arr">→</div>
+			<div class="to"><c>session_target</c> 예산 도달 시 <strong>새 run을 열고 summary_title을 끌고 “계속”</strong>. 요약이 아니라 <em>페이지 전환</em>.</div>
+		</div>
+		<div class="note">왜? — 대규모 리팩터/장기 작업에선 요약이 정보를 잃는다. 예산을 리셋하고 깨끗한 컨텍스트에서 이어가는 쪽이 손실이 적다.</div>
+	</div>
+
+	<div class="gauge">
+		<div class="gauge-track">
+			<div class="gauge-fill" style="width:71%"></div>
+			<div class="gauge-mark" style="left:80%"></div>
+		</div>
+		<div class="gauge-scale"><span>tokens_used = 0</span><span>~71% 사용</span><span>token_budget</span></div>
+		<div class="status-row">
+			<span class="badge active">active — 예산 소진 중</span>
+			<span class="badge limited">budget_limited — 도달, continuation</span>
+			<span class="badge paused">paused — 사용자 일시정지</span>
+		</div>
+	</div>
+
+	<pre><span class="c1">// db.sqlite · session_target 테이블 (runtime)</span>
+session_target(
+  session_id, target_id,              <span class="c1">-- target_mspe0zzs_…</span>
+  objective,
+  status CHECK(<span class="s">'active'</span>,<span class="s">'paused'</span>,<span class="s">'budget_limited'</span>,<span class="s">'complete'</span>),
+  token_budget, tokens_used, time_used_seconds,
+  summary_title,                       <span class="c1">-- goal_summary_title_generation이 채움</span>
+  active_input_id, active_run_started_at, active_run_last_seen_at
+)</pre>
+	<p>
+		전문가 프레이밍: compaction이 “<strong>과거를 압축해 현재 창에 넣기</strong>”라면, continuation은 “<strong>예산을 리셋하고 새 창에서 이어가기</strong>”다.
+		이 둘은 정반대 전략이며 ZCode는 둘 다 갖는다 — 요약이 적합한 짧은 맥락엔 compaction, 연속이 적합한 긴 작업엔 continuation.
+		<c>target.continuation.started</c> 이벤트로 새 run이 열리고 <c>summary_title</c>이 맥락을 이어받는다.
+	</p>
+</section>
+
+<!-- ===================== 8. TOOL BUDGET ===================== -->
+<section id="toolbudget">
+	<div class="sec-head"><span class="sec-num">07</span><h2>툴 출력 예산화<span class="ko">budgetStrategy — 거대 stdout의 우아한 처리</span></h2></div>
+
+	<div class="bridge">
+		<div class="t">FAMILIAR → ZCODE</div>
+		<div class="row">
+			<div class="from">툴 결과를 maxTokens에서 절단. 잘린 부분은 영영 소실.</div>
+			<div class="arr">→</div>
+			<div class="to"><strong>artifact</strong>: 전체를 파일로 offload하고 모델엔 <em>참조(persisted-output)</em>만 반환. <strong>truncate</strong>: 절단 + 공지. 원본은 보존.</div>
+		</div>
+		<div class="note">왜? — 빌드 로그/테스트 출력은 “지금 다 안 봐도 된다”지만 “나중에 다시 봐야 할 수도 있다”. 참조 패턴이 이 둘을 모두 만족.</div>
+	</div>
+
+	<div class="grid-2">
+		<div>
+			<h3 style="margin-top:0">artifact</h3>
+			<p>출력 전체를 파일로 쓰고, 모델에는 참조만. 원본은 디스크에 보존되어 이후 탐색 가능.</p>
+			<pre><span class="c1">// part.metadata.serialization</span>
+{
+  <span class="p">budgetStrategy</span>: <span class="s">"artifact"</span>,
+  <span class="p">originalBytes</span>: <span class="n">1803</span>,
+  <span class="p">returnedBytes</span>: <span class="n">120</span>,
+  <span class="p">artifactPath</span>: <span class="s">"…/sess_…/call_…-stdout.log"</span>
+}</pre>
+		</div>
+		<div>
+			<h3 style="margin-top:0">truncate</h3>
+			<p><c>maxBytes</c>에서 절단하고 잘렸음을 알리는 꼬리를 붙인다. 빠르고 단순.</p>
+			<pre>…
+[output truncated: <span class="n">50211</span> -&gt;
+       <span class="n">8192</span> bytes]</pre>
+		</div>
+	</div>
+	<p>
+		모델은 <code>&lt;persisted-output originalBytes="…"&gt;…path…&lt;/persisted-output&gt;</code>를 보고, 필요하면 <c>Read</c>/<c>Bash</c>로 <strong>부분적으로 재방문</strong>한다.
+		이것이 ZCode가 거대 출력을 다루는 방식 — 컨텍스트는 보호하되 정보는 버리지 않는다.
+	</p>
+</section>
+
+<!-- ===================== 9. INPUT QUEUE ===================== -->
+<section id="queue">
+	<div class="sec-head"><span class="sec-num">08</span><h2>입력 큐 모델<span class="ko">session_input — 손실 없는 스티어링</span></h2></div>
+
+	<div class="bridge">
+		<div class="t">FAMILIAR → ZCODE</div>
+		<div class="row">
+			<div class="from">긴 턴 중 입력: 큐에 쌓아 턴 끝에 처리 OR 즉시 인터럽트. 둘 중 하나.</div>
+			<div class="arr">→</div>
+			<div class="to"><strong>3-way delivery</strong> + 생애주기. startNow(인터럽트) · <c>guide</c>(인플라이트, 기본) · queue(다음 턴). admitted→promoted.</div>
+		</div>
+		<div class="note">왜? — “지금 바꾸고 싶다” vs “지금 하던 거 끝내고 봐라” vs “중간에 참고만 해라”를 한 매커니즘으로 표현.</div>
+	</div>
+
+	<table class="tbl">
+		<thead><tr><th>delivery</th><th>동작</th><th>비고</th></tr></thead>
+		<tbody>
+			<tr><td><code>startNow</code></td><td>진행 중 턴을 <strong>인터럽트</strong>하고 즉시 주입</td><td>긴급 정정·중단</td></tr>
+			<tr><td><code>guide</code></td><td>진행 중 턴에 <strong>인플라이트 가이드</strong>로 흘림</td><td><c>zcodeInteractionBehavior:"guide"</c> — 기본값</td></tr>
+			<tr><td><code>queue</code></td><td>현재 턴 종료 후 <strong>다음 턴</strong>에 주입</td><td>순차 큐잉</td></tr>
+		</tbody>
+	</table>
+	<pre><span class="c1">// 입력 생애주기</span>
+admitted  ─▶  promoted   (promoted_message_id로 실제 메시지 생성)
+   │
+   └─▶ cancelled | discarded | failed   (status_reason 사유 기록)</pre>
+	<p>
+		5분째 턴을 도는 중에도 “잠깐, 방향 바꿀게”가 입력되면 — 그 말이 사라지지 않고 <strong>의미있는 시점에 합류</strong>한다.
+		이것이 ZCode가 “반응형 에이전트”이기 위한 기반.
+	</p>
+</section>
+
+<!-- ===================== 10. RETRY ===================== -->
+<section id="retry">
+	<div class="sec-head"><span class="sec-num">09</span><h2>재시도 · 백오프<span class="ko">컨텍스트 문제와 실패 복구의 결합</span></h2></div>
+	<p>
+		컨텍스트 관리는 실패 복구와 맞닿아 있다. 모델 요청은 <c>model.request.status</c>로 단계 추적되고, 일시 오류는 지수 백오프.
+		<strong>핵심 결합</strong>: 길이 초과 실패는 <em>reactive compaction</em>과 쌍으로 처리된다 — 실패 원인이 “컨텍스트가 크서”면, 줄이고 같은 턴을 재시도.
+	</p>
+	<pre><span class="c1">// model.request.status phase</span>
+[ <span class="s">"model_request_started"</span>, <span class="s">"model_request_completed"</span>, <span class="s">"model_request_failed"</span>,
+  <span class="s">"model_retry_scheduled"</span>, <span class="s">"model_stream_stalled"</span> ]
+
+{ attempt, maxAttempts, delayMs, nextAttempt, idleMs, timeoutMs, retryable, statusCode }</pre>
+	<ul>
+		<li><strong>retryable</strong> 참일 때만 <c>model_retry_scheduled</c> 백오프 (<c>delayMs</c>/<c>nextAttempt</c>).</li>
+		<li><strong>stream_stalled</strong> — 스트리밍 정지 별도 감지/복구.</li>
+		<li>길이 초과 시 <strong>1회 reactive compaction 후 동일 턴 재시도</strong> — “포기”가 아니라 “줄이고 다시”.</li>
+	</ul>
+</section>
+
+<!-- ===================== 11. PERSISTENCE ===================== -->
+<section id="persist">
+	<div class="sec-head"><span class="sec-num">10</span><h2>영속 스키마<span class="ko">db.sqlite — event-sourced 세션</span></h2></div>
+	<p>
+		ZCode 세션은 <strong>이벤트 소싱</strong>에 가깝다. <c>message → part</c> 이중 구조에, 의미있는 사건(모델콜·터ン·툴·compaction·입력)이 각각 전용 테이블에 기록되어 <strong>재생/분석 가능</strong>하다.
+	</p>
+	<div class="grid-2">
+		<div>
+			<h3 style="margin-top:0">콘텐츠 트리</h3>
+			<ul>
+				<li><code>session</code> — 루트 (parent_id로 포크/서브에이전트 트리)</li>
+				<li><code>message</code> — role별 컨테이너, <c>data</c> JSON에 모델/모드/토큰</li>
+				<li><code>part</code> — text/tool/reasoning 블록, <c>sequence</c> 자동번호</li>
+			</ul>
+		</div>
+		<div>
+			<h3 style="margin-top:0">부가 로그</h3>
+			<ul>
+				<li><code>session_entry</code> — 타입별 append-log (compaction·라벨·모드변경)</li>
+				<li><code>session_target</code> — 목표 예산/연속</li>
+				<li><code>session_input</code> — 입력 큐(delivery/status)</li>
+				<li><code>turn_usage</code> / <code>model_usage</code> / <code>tool_usage</code></li>
+			</ul>
+		</div>
+	</div>
+	<div class="callout">
+		<div class="t">tool_usage × PERMISSION LEAK</div>
+		<c>tool_usage</c>는 <code>read_only</code>·<code>destructive</code>·<code>side_effect_scope</code>·<code>approval_status</code> 칼럼을 갖는다 —
+		<strong>권한 게이팅이 영속 계층까지 스며들어</strong> 있고, plan 모드의 “읽기전용 강제”가 이 분류에 의존한다.
+		컨텍스트 매니지먼트와 권한이 같은 스키마에서 만나는 지점.
+	</div>
+</section>
+
+<!-- ===================== 12. PIPELINE ===================== -->
+<section id="pipeline">
+	<div class="sec-head"><span class="sec-num">11</span><h2>전체 파이프라인<span class="ko">한 턴이 지나는 길 — 모든 메커니즘의 합주</span></h2></div>
+	<div class="overview">
+		<div class="ov-row"><div class="lab">① 빌드</div><div class="body"><b>system_prompt + skills + tool_schemas + messages</b>를 7-소스로 조립. 각 층 <c>cache_control:ephemeral</c>.</div></div>
+		<div class="ov-row"><div class="lab">② 윈도잉</div><div class="body"><c>messageOffset/Count</c>로 활성 창 결정. compaction 이력 반영.</div></div>
+		<div class="ov-row"><div class="lab">③ 게이팅</div><div class="body">권한 모드(plan/build/edit/yolo/auto)로 툴 허용/차단. <c>tool_usage</c>에 분류 기록.</div></div>
+		<div class="ov-row"><div class="lab">④ 호출</div><div class="body">Anthropic Messages 스트리밍(GLM). 실패 시 <c>model.request.status</c> 백오프, overflow 시 reactive compaction.</div></div>
+		<div class="ov-row"><div class="lab">⑤ 툴 실행</div><div class="body">출력은 <c>budgetStrategy</c>(artifact/truncate)로 절단/offload → part로 부착.</div></div>
+		<div class="ov-row"><div class="lab">⑥ 턴 종료</div><div class="body"><c>turn_end</c>. <c>session_target.tokens_used</c> 갱신. 예산 도달 시 <b>continuation</b>.</div></div>
+		<div class="ov-row"><div class="lab">⑦ 압축</div><div class="body">임계 도달 시 <c>compaction.terminal</c>(5 트리거). 요약 엔트리로 교체.</div></div>
+		<div class="ov-row"><div class="lab">⑧ 영속</div><div class="body">message/part/session_entry/session_input/usage 테이블에 이벤트 기록. 재생 가능.</div></div>
+	</div>
+	<div class="callout">
+		<div class="t">ONE-LINER</div>
+		ZCode의 컨텍스트 매니지먼트는 <strong>“층위가 다른 다섯 개의 밸브”</strong>다 — 예산 진단(7-소스) → 요약(compaction) → 작업 단위 리셋(target/continuation) → 출력 절단(budget) → 캐시/윈도잉.
+		각 밸브가 독립적으로 열리고 닫히며, 한 층의 부족함을 다음 층이 보완한다. 익숙한 패턴들이 <em>진단 가능하고, 일급이고, 재생 가능한 형태</em>로 재실현된 곳.
+	</div>
+</section>
+
+<footer>
+	Cross-verified against ZCode <c>@zcode/desktop v3.7.5</c> host/scheduler bundle (esbuild, keep-names) and runtime artifacts (db.sqlite · tasks-index.sqlite · model-io rollout) · 2026 — 전문가 독자용 첫 안내서
+</footer>
+
+</main>
+</div>
+</body>
+</html>
